@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="GoTo">
+    <Sequence>
+      <SetGoal location=""/>
+      <IsReached/>
+      <Speak text="i reached it"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="IsReached"
+            editable="true"/>
+    <Action ID="SetGoal"
+            editable="true">
+      <input_port name="location">where to go</input_port>
+    </Action>
+    <Action ID="Speak"
+            editable="true">
+      <input_port name="text"
+                  default="i reached it"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>
