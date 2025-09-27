@@ -8,14 +8,14 @@ SetGoal::SetGoal(const std::string& name, const BT::Nodeconfig& config)
     : BT::StatefulActionNode(name, config)
 {
     node_ = config.blackboard->get<rclcpp::Node::SharedPtr>("node");
-    client_ = node_->create_client<lifecycle_msgs::srv::ChangeState>("/semantic_navigator/change_state");
+    client_ = node_->create_client<lifecycle_msgs::srv::ChangeState>("/semantic_navigator3/change_state");
     rb_client_ = node_->create_client<rby1_custom_interfaces::srv::CallLoc>("/navigate_semantic_region");
 }
 
 NodeStatus SetGoal::OnStart(){
     RCLCPP_INFO(node_->get_logger(), "SetGoal : Calling ACTIVATE service...")
 
-    if(!client->wait_for_service(std::chrono::seconds(1))){
+    if(!client_->wait_for_service(std::chrono::seconds(1))){
         RCLCPP_ERROR(node_->get_logger(), "Service Lifecycle is not available");
         return NodeStatus::FAILURE;
     }
@@ -47,14 +47,29 @@ void SetGoal::onHalted(){
 IsReached::IsReached(const std::string& name, const BT::Nodeconfig& config)
   : BT::SyncActionNode(name, config)
 {
+public:
     node_ = config.blackboard->get<rclcpp::Node::SharedPtr>("node");
+    node_->create_subscription<std_msgs::msg::Bool>(
+        "/goal_reached", 10,
+        std::bind(&IsReached::topic_callback, this, std::placeholders::_1)
+    )
+private:
+    auto status= NodeStatus::RUNNING;
+
 }
 NodeStatus IsReached::tick(){
- // TODO 
-    return NodeStatus::FAILURE;
+    return status;
 }
 BT::PortsList IsReached::providedPorts(){return {};}
 
+void IsReached::topic_callback(const std_msgs::msg::Bool::SharedPtr msg){
+    if(msg->data == true){
+        status = NodeStatus::SUCCESS;
+    }
+    else{
+        status = NodeStatus::FAILURE;
+    }
+}
 
 
 Speak::Speak(const std::string& name, const BT::NodeConfig& config)

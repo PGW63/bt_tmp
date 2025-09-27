@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
     // XML로부터 트리 생성
     BT::Tree tree = factory.createTreeFromFile(
-        "/home/gw/plan_ws/src/planning_tutorial/bt_xmls/findObjects.xml",
+        "/home/gw/plan_ws/src/bt_tmp/planning_tutorial/bt_xmls/findObjects.xml",
         blackboard);
 
     RCLCPP_INFO(node->get_logger(), "Behavior Tree started!");
