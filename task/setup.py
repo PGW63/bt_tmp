@@ -21,6 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'yolo_node = task.detector:main',
+            'auto_captioner_node = task.vlm:main',
+            'yolo2_node = task.detect2:main',
         ],
     },
 )

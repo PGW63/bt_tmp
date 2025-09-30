@@ -16,7 +16,7 @@ SetObjects::SetObjects(const std::string& name, const BT::NodeConfig& config)
     pub_ = node_->create_publisher<std_msgs::msg::String>("/set_objects", qos);
     
     // yolo_node lifecycle 관리용 클라이언트
-    client_ = node_->create_client<lifecycle_msgs::srv::ChangeState>("/yolo_node/change_state");
+    // client_ = node_->create_client<lifecycle_msgs::srv::ChangeState>("/yolo_node/change_state");
 }
 
 NodeStatus SetObjects::onStart() {
@@ -24,48 +24,63 @@ NodeStatus SetObjects::onStart() {
     RCLCPP_INFO(node_->get_logger(), "SetObjects: Calling ACTIVATE service...");
 
     // 서비스가 준비되었는지 확인
-    if (!client_->wait_for_service(std::chrono::seconds(1))) {
-        RCLCPP_ERROR(node_->get_logger(), "Service /yolo_node/change_state not available");
-        return NodeStatus::FAILURE;
-    }
+    // if (!client_->wait_for_service(std::chrono::seconds(1))) {
+    //     RCLCPP_ERROR(node_->get_logger(), "Service /yolo_node/change_state not available");
+    //     return NodeStatus::FAILURE;
+    // }
 
-    auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
-    // [중요] CONFIGURE → ACTIVATE 로 변경
-    request->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE; 
+    // auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
+
+    // request->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE; 
     
-    future_ = client_->async_send_request(request);
-    current_state_ = State::WAITING_FOR_RESPONSE;
+    // future_ = client_->async_send_request(request);
+    // current_state_ = State::WAITING_FOR_RESPONSE;
 
     return NodeStatus::RUNNING; // 서비스 응답 대기
 }
 
 NodeStatus SetObjects::onRunning() {
-    if (current_state_ == State::WAITING_FOR_RESPONSE) {
-        if (future_.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-            auto response = future_.get();
-            if (response->success) {
-                RCLCPP_INFO(node_->get_logger(), "Activate service SUCCESS. Publishing target object...");
+    // if (current_state_ == State::WAITING_FOR_RESPONSE) {
+    //     if (future_.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+    //         auto response = future_.get();
+    //         if (response->success) {
+    //             RCLCPP_INFO(node_->get_logger(), "Activate service SUCCESS. Publishing target object...");
                 
-                auto text = getInput<std::string>("willfinds");
-                if (!text) {
-                    RCLCPP_ERROR(node_->get_logger(), "missing input [willfinds]");
-                    return NodeStatus::FAILURE;
-                }
-                auto msg = std_msgs::msg::String();
-                msg.data = text.value();
-                pub_->publish(msg);
+    //             auto text = getInput<std::string>("willfinds");
+    //             if (!text) {
+    //                 RCLCPP_ERROR(node_->get_logger(), "missing input [willfinds]");
+    //                 return NodeStatus::FAILURE;
+    //             }
+    //             auto msg = std_msgs::msg::String();
+    //             msg.data = text.value();
+    //             pub_->publish(msg);
 
-                return NodeStatus::SUCCESS; 
+    //             return NodeStatus::SUCCESS; 
                 
-            } else {
-                RCLCPP_ERROR(node_->get_logger(), "Activate service FAILED");
-                return NodeStatus::FAILURE;
-            }
-        } else {
-            return NodeStatus::RUNNING; 
-        }
+    //         } else {
+    //             RCLCPP_ERROR(node_->get_logger(), "Activate service FAILED");
+    //             return NodeStatus::FAILURE;
+    //         }
+    //     } else {
+    //         return NodeStatus::RUNNING; 
+    //     }
+    // }
+    auto text = getInput<std::string>("willfinds");
+    if (text){
+        RCLCPP_INFO(node_->get_logger(), "SetObjects: Publishing target object %s", text.value().c_str());
     }
-    return NodeStatus::RUNNING;
+    else{
+        RCLCPP_ERROR(node_->get_logger(), "SetObjects: missing input [willfinds]");
+        return NodeStatus::FAILURE;
+    }
+    
+
+    auto msg= std_msgs::msg::String();
+    msg.data = text.value();
+    pub_->publish(msg);
+
+
+    return NodeStatus::SUCCESS;
 }
 
 void SetObjects::onHalted() {
@@ -74,7 +89,11 @@ void SetObjects::onHalted() {
 }
 
 BT::PortsList SetObjects::providedPorts() {
-    return { BT::InputPort<std::string>("willfinds") };
+    return 
+    { 
+        BT::InputPort<std::string>("willfinds"),
+        BT::InputPort<rclcpp::Node::SharedPtr>("node")  
+    };
 }
 
 
@@ -92,12 +111,22 @@ IsDetected::IsDetected(const std::string& name, const BT::NodeConfig& config)
 }
 
 BT::PortsList IsDetected::providedPorts(){
-    return {};
+    return 
+    {
+        BT::InputPort<rclcpp::Node::SharedPtr>("node")
+    };
 }
 
 NodeStatus IsDetected::onStart() {
     atomic_status_.store(NodeStatus::RUNNING);
     RCLCPP_INFO(node_->get_logger(), "IsDetected: Waiting for detection result...");
+
+    auto start = std::chrono::steady_clock::now();
+    while (std::chrono::steady_clock::now() - start < std::chrono::seconds(3)) {
+        
+    }
+
+
     return NodeStatus::RUNNING;
 }
 
@@ -129,19 +158,25 @@ NodeStatus Pan::tick() {
     RCLCPP_INFO(rclcpp::get_logger("Pan"), "Panning camera...");
     return NodeStatus::SUCCESS; 
 }
-BT::PortsList Pan::providedPorts(){ return {}; }
+BT::PortsList Pan::providedPorts()
+{
+    return 
+    {
+        BT::InputPort<rclcpp::Node::SharedPtr>("node") 
+    }; 
+}
 
 
 // ----------------- Speak -----------------
-Speak::Speak(const std::string& name, const BT::NodeConfig& config)
-    : BT::SyncActionNode(name, config) {}
-NodeStatus Speak::tick() { 
-    //RCLCPP_INFO(rclcpp::get_logger("Speak"), "Speaking result...");
+// Speak::Speak(const std::string& name, const BT::NodeConfig& config)
+//     : BT::SyncActionNode(name, config) {}
+// NodeStatus Speak::tick() { 
+//     //RCLCPP_INFO(rclcpp::get_logger("Speak"), "Speaking result...");
     
-    RCLCPP_INFO(rclcpp::get_logger("Speak"), "I found it!");
-    return NodeStatus::SUCCESS; 
-}
-BT::PortsList Speak::providedPorts(){ return {}; }
+//     RCLCPP_INFO(rclcpp::get_logger("Speak"), "I found it!");
+//     return NodeStatus::SUCCESS; 
+// }
+// BT::PortsList Speak::providedPorts(){ return {}; }
 
 
 // ----------------- RegisterNodes -----------------
@@ -149,7 +184,7 @@ void RegisterNodes(BT::BehaviorTreeFactory& factory) {
     factory.registerNodeType<SetObjects>("SetObjects");
     factory.registerNodeType<IsDetected>("IsDetected");
     factory.registerNodeType<Pan>("Pan");
-    factory.registerNodeType<Speak>("Speak");
+    // factory.registerNodeType<Speak>("Speak");
 }
 
 } // namespace FindObjects

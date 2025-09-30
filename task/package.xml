@@ -18,6 +18,9 @@
   <depend>rclpy_lifecycle</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>requests</depend>
+  <depend>Pillow</depend>
+  <depend>rby1_custom_interfaces</depend>
   
 
   <export>

@@ -1,0 +1,11 @@
+<?xml="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+    <BehaviorTree ID="Describe_person">
+        <Sequence>
+            <Script code="@willfinds := 'person'"/>
+            <SubTree ID="FindObjects" node="{@node}" lifecycle="{@lifecycle}" willfinds="{@willfinds}"/>
+            <DescribePerson node="{@node}" text="{@text}"/>
+            <Speak node="{@node}" text="{@text}"/>
+        </Sequence>
+    </BehaviorTree>
+</root>

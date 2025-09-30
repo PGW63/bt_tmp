@@ -12,21 +12,19 @@
 #include "std_msgs/msg/string.hpp"
 #include "lifecycle_msgs/srv/change_state.hpp"
 #include "lifecycle_msgs/srv/get_state.hpp"
-#include "autio_common_msgs/action/tts.hpp"
+#include "audio_common_msgs/action/tts.hpp"
 
 
 namespace Speak {
 
 using BT::NodeStatus;
 
-class Speak : public BT::StatefulActionNode
+class Speak : public BT::SyncActionNode
 {
 public:
     Speak(const std::string& name, const BT::NodeConfig& config);
 
-    NodeStatus onStart() override;
-    NodeStatus onRunning() override;
-    void onHalted() override;
+    NodeStatus tick() override;
 
     static BT::PortsList providedPorts();
 
@@ -37,7 +35,8 @@ private:
     rclcpp::Node::SharedPtr node_;
     rclcpp_action::Client<TTS>::SharedPtr client_;
 
-    std::shared_future<GoalHandleTTS::SharedPtr> future_result_;
+    std::shared_future<rclcpp_action::ClientGoalHandle<audio_common_msgs::action::TTS>::WrappedResult> future_result_;
+
 };
 
 void RegisterNodes(BT::BehaviorTreeFactory& factory);

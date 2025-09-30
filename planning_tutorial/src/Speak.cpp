@@ -3,10 +3,10 @@
 #include "planning_tutorial/Speak.h"
 #include <chrono>
 
-namespace Speack{
+namespace Speak{
 
 Speak::Speak(const std::string& name, const BT::NodeConfig& config)
-    : BT::StatefulActionNode(name, config)
+    : BT::SyncActionNode(name, config)
 {
     node_ = config.blackboard->get<rclcpp::Node::SharedPtr>("node");
 
@@ -16,11 +16,15 @@ Speak::Speak(const std::string& name, const BT::NodeConfig& config)
 }
 
 BT::PortsList Speak::providedPorts(){
-    return { BT::InputPort<std::string>("text", "Text to be spoken") };
+    return 
+    { 
+        BT::InputPort<std::string>("text", "Text to be spoken"),
+        BT::InputPort<rclcpp::Node::SharedPtr>("node") 
+    };
 }
 
-NodeStatus Speak::onStart(){
-    auto text = getInput<std::string>("text","I did it!");
+NodeStatus Speak::tick(){
+    auto text = getInput<std::string>("text");
     if(!text){
         RCLCPP_ERROR(node_->get_logger(),"missing input [text]");
         return NodeStatus::FAILURE;
@@ -34,51 +38,57 @@ NodeStatus Speak::onStart(){
     auto goal_msg = TTS::Goal();
     goal_msg.text = text.value();
 
-    RCPCPP_INFO(node_->get_logger(), "sending goal...");
+    RCLCPP_INFO(node_->get_logger(), "sending goal...");
 
     auto send_goal_options = rclcpp_action::Client<TTS>::SendGoalOptions();
 
+ 
     auto goal_handle_future = this->client_->async_send_goal(goal_msg, send_goal_options);
 
-    if (rclcpp:spin_until_future_complete(node_, goal_handle_future, std::chrono::seconds(1))) != rclcpp::FutureReturnCode::SUCCESS
-    {
-        RCLCPP_ERROR(node_->get_logger(), "send goal call failed");
-        return NodeStatus::FAILURE;
-    }
+    // if (rclcpp::spin_until_future_complete(node_, goal_handle_future, std::chrono::seconds(1)) != rclcpp::FutureReturnCode::SUCCESS)
+    // {
+    //     RCLCPP_ERROR(node_->get_logger(), "send goal call failed");
+    //     return NodeStatus::FAILURE;
+    // }
 
-    GoalHandleTTS::SharedPtr goal_handle = goal_handle_future.get();
-    if (!goal_handle){
-        RCLCPP_ERROR(node_->get_logger(), "Goal was rejected by server");
-        return NodeStatus::FAILURE;
-    }
+    // RCLCPP_INFO(node_->get_logger(), "where1");
 
-    future_result_ = this->client_->asynce_get_result(goal_handle);
-    return NodeStatus::RUNNING;
+    // GoalHandleTTS::SharedPtr goal_handle = goal_handle_future.get();
+    // if (!goal_handle){
+    //     RCLCPP_ERROR(node_->get_logger(), "Goal was rejected by server");
+    //     return NodeStatus::FAILURE;
+    // }
+
+    // RCLCPP_INFO(node_->get_logger(), "where3");
+
+    // future_result_ = this->client_->async_get_result(goal_handle);
+
+    return NodeStatus::SUCCESS;
 }
 
-NodeStatus Speak::onRunning(){
-    if (future_result_.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-    {
-        auto result = future_result_.get();
+// NodeStatus Speak::onRunning(){
+//     if (future_result_.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+//     {
+//         auto result = future_result_.get();
 
-        if (result.code == rclcpp_action::ResultCode::SUCCEEDED)
-        {
-            RCLCPP_INFO(node_->get_logger(), "TTS succeeded");
-            return NodeStatus::SUCCESS;
-        }
-        else
-        {
-            RCLCPP_ERROR(node_->get_logger(), "TTS was aborted or canceled");
-            return NodeStatus::FAILURE;
-        }
-    }
+//         if (result.code == rclcpp_action::ResultCode::SUCCEEDED)
+//         {
+//             RCLCPP_INFO(node_->get_logger(), "TTS succeeded");
+//             return NodeStatus::SUCCESS;
+//         }
+//         else
+//         {
+//             RCLCPP_ERROR(node_->get_logger(), "TTS was aborted or canceled");
+//             return NodeStatus::FAILURE;
+//         }
+//     }
 
-    return NodeStatus::RUNNING;
-}
+//     return NodeStatus::SUCCESS;
+// }
 
-void Speak::onHalted(){
-    RCLCPP_INFO(node_->get_logger(), "Speak halted");
-}
+// void Speak::onHalted(){
+//     RCLCPP_INFO(node_->get_logger(), "Speak halted");
+// }
 
 void RegisterNodes(BT::BehaviorTreeFactory& factory){
     factory.registerNodeType<Speak>("Speak");

@@ -6,36 +6,41 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "lifecycle_msgs/srv/change_state.hpp"
+#include "ament_index_cpp/get_package_share_directory.hpp"
+
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <string>
 
 namespace LifecycleBT {
 
 using BT::NodeStatus;
 
-class InitLifecycle : public BT::StatefulActionNode {
+class InitLifecycle : public BT::SyncActionNode {
 public:
     InitLifecycle(const std::string& name, const BT::NodeConfig& config);
 
     static BT::PortsList providedPorts();
 
-    NodeStatus onStart() override;
-    NodeStatus onRunning() override;
-    void onHalted() override;
+    NodeStatus tick() override;
 
 private:
-    enum class Stage { CONFIGURE, ACTIVATE, DONE };
-    Stage current_stage_;
-
     rclcpp::Node::SharedPtr node_;
+    std::string current_Action;
+    std::string prev_Action;
 
-    struct Target {
-        std::string name; // 예: "/yolo_node"
-        rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr client;
-        rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture future;
-        bool configured = false;
-        bool activated = false;
-    };
+    std::vector<std::string> service_names_;
+    std::vector<rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr> clients_; 
+    // std::vector<rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr> deactivate_clients_;
+    
+    
 
-    std::vector<Target> targets_;
+    std::string config_file;
+    std::vector<std::string> lifes;
+    // std::vector<std::string> prev_lifecycle_nodes;
+
+    bool initialized_ = false;
 };
 
 void RegisterNodes(BT::BehaviorTreeFactory& factory);

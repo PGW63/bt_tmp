@@ -2,24 +2,31 @@
 <root BTCPP_format="4">
   <BehaviorTree ID="GoTo">
     <Sequence>
-      <SetGoal location=""/>
-      <IsReached/>
-      <Speak text="i reached it"/>
+      <!-- <Script code="@lifecycle := 'GoTo'"/>
+      <InitLifecycle node="{@node}" lifecycle="{@lifecycle}"/> -->
+      <SetGoal node="{@node}" location="{@location}"/>
+
+      <IsReached node="{@node}"/>
+      
+      <Script code="@text := 'i reached it'"/>
+      <Speak node="{@node}" text="{@text}"/>
     </Sequence>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
-    <Action ID="IsReached"
-            editable="true"/>
-    <Action ID="SetGoal"
-            editable="true">
+    <!-- <Action ID="InitLifecycle" editable="true"/>
+      <input_port name="node">ros2 node</input_port>
+      <input_port name="lifecycle">what's lifecycle nodes will be turned on</input_port> -->
+    <Action ID="IsReached" editable="true"/>
+      <input_port name="node">ros2 node</input_port>
+    <Action ID="SetGoal" editable="true">
+      <input_port name="node">ros2 node</input_port>
       <input_port name="location">where to go</input_port>
     </Action>
-    <Action ID="Speak"
-            editable="true">
-      <input_port name="text"
-                  default="i reached it"/>
+    <Action ID="Speak" editable="true">
+      <input_port name="node">ros2 node</input_port>
+      <input_port name="text" default="i reached it"/>
     </Action>
   </TreeNodesModel>
 

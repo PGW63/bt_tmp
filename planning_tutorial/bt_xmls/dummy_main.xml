@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+    <BehaviorTree ID="dummy_main">
+        <Sequence>
+            <!-- <Script code="@location := 'door_in_guestroom'"/> -->
+            <Script code="@willfinds := 'person'"/>
+            <SubTree ID="Describe_person" node="{@node}" lifecycle="{@lifecycle}" willfinds="{@willfinds}"/>
+            <Script code="@location := 'livingroom'"/>
+            <SubTree ID="GoTo" node="{@node}" location="{@location}" lifecycle="{@lifecycle}"/>
+            <Script code="@willfinds := 'banana'"/>
+            <SubTree ID="FindObjects" node="{@node}" lifecycle="{@lifecycle}" willfinds="{@willfinds}"/>
+            <Script code="@location := 'dinningroom'"/>
+            <SubTree ID="GoTo" node="{@node}" location="{@location}" lifecycle="{@lifecycle}"/>
+        </Sequence>
+    </BehaviorTree>
+</root>

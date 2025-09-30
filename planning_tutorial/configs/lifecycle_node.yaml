@@ -1,0 +1,9 @@
+lifecycle:
+  - name: GoTo
+    lifecycle_nodes: [
+      "/semantic_navigator3"
+    ]
+  - name: FindObjects
+    lifecycle_nodes: [
+      "/yolo_node"
+    ]

@@ -81,12 +81,12 @@ public:
     static BT::PortsList providedPorts();
 };
 
-class Speak : public BT::SyncActionNode {
-public:
-    Speak(const std::string& name, const BT::NodeConfig& config);
-    NodeStatus tick() override;
-    static BT::PortsList providedPorts();
-};
+// class Speak : public BT::SyncActionNode {
+// public:
+//     Speak(const std::string& name, const BT::NodeConfig& config);
+//     NodeStatus tick() override;
+//     static BT::PortsList providedPorts();
+// };
 
 void RegisterNodes(BT::BehaviorTreeFactory& factory);
 

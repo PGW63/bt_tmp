@@ -74,7 +74,7 @@ class YoloDetectionNode(LifecycleNode):
     def on_activate(self, state: LifecycleState) -> TransitionCallbackReturn:
         self.get_logger().info("Activating... (Active 상태 진입)")
         try:
-            self.image_sub = self.create_subscription(Image, '/rgb', self.image_callback, 10)
+            self.image_sub = self.create_subscription(Image, '/camera/camera/color/image_raw', self.image_callback, 10)
             self.get_logger().info('Image subscription started.')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:

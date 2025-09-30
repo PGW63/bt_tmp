@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="FindObjects">
+    <Sequence>
+      <!-- <Script code="@lifecycle := 'FindObjects'"/> -->
+      <!-- <InitLifecycle node="{@node}" lifecycle="{@lifecycle}"/> -->
+      <!-- <Script code="@willfinds := 'banana'"/> -->
+      <SetObjects node="{@node}" willfinds="{@willfinds}"/>
+      <RetryUntilSuccessful num_attempts="5">
+        <Fallback>
+          <IsDetected node="{@node}"/>
+          <Pan node="{@node}"/>
+        </Fallback>
+      </RetryUntilSuccessful>
+      <Script code="@text := 'I found it!'"/>
+      <Speak node="{@node}" text="{@text}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <TreeNodesModel>
+    <!-- <Action ID="InitLifecycle" editable="true"/>
+      <input_port name="node">ros2 node</input_port>
+      <input_port name="lifecycle">what's lifecycle nodes will be turned on</input_port> -->
+    <Action ID="SetObjects" editable="true">
+      <input_port name="willfinds" default="banana"/>
+      <input_port name="node">ros2 node</input_port>
+    </Action>
+    <Condition ID="IsDetected" editable="true"/>
+    <Action ID="Pan" editable="true"/>
+      <input_port name="node">ros2 node</input_port>
+    <Action ID="Speak" editable="true"/>
+      <input_port name="text" default="i did it"/>
+      <input_port name="node">ros2 node</input_port>
+  </TreeNodesModel>
+</root>
