@@ -1,6 +1,8 @@
 # BehaviorTree.CPP
 
-```git clone https://github.com/BehaviorTree/BehaviorTree.CPP.git```
+```
+git clone https://github.com/BehaviorTree/BehaviorTree.CPP.git
+```
 
 
 https://github.com/BehaviorTree/BehaviorTree.CPP.git
