@@ -1,8 +1,8 @@
 ## BehaviorTree.CPP
 
-'''
+"""
   git clone https://github.com/BehaviorTree/BehaviorTree.CPP.git
-'''
+"""
 
 https://github.com/BehaviorTree/BehaviorTree.CPP.git
 
@@ -17,31 +17,31 @@ https://github.com/BehaviorTree/BehaviorTree.ROS2.git
 
 We must turn these nodes
 
-Detector
+# Detector
 
 '''
   ros2 run task yolo2_node
 '''
 
-Nav2
+# Nav2
 
 '''
   ros2 launch rby1_navigation carter_navigation.launch.py
 '''
 
-Semantic Navigator
+# Semantic Navigator
 
 '''
   ros2 run rby1_custom_pkg semantic_navigator2
 '''
 
-describe person cation
+# describe person cation
 
 '''
   ros2 run task auto_captioner_node
 '''
 
-speak tts
+# speak tts
 
 '''
   ros2 launch tts_bringup tts.launch.py
