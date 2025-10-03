@@ -32,6 +32,10 @@ Some codes are added at vosper.py
   git clone https://github.com/ros-ai/ros2_whisper.git
 ```
 
+# TTS_ROS
+```
+git clone https://github.com/mgonzs13/tts_ros.git
+```
 
 
 
