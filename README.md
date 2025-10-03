@@ -40,6 +40,8 @@ git clone https://github.com/mgonzs13/tts_ros.git
 ```
 https://github.com/ros-drivers/audio_common.git
 ```
+# temp drive 
+https://drive.google.com/file/d/1fZKGZ6Ztx6xYexERkuZpSF-ElG6jRSVd/view?usp=drive_link
 
 
 # How to use
