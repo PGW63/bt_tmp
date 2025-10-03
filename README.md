@@ -27,6 +27,12 @@ Some codes are added at vosper.py
             self.vosk.Reset()
             self.recording_whisper = False
 ```
+# Whisper
+```
+  git clone https://github.com/ros-ai/ros2_whisper.git
+```
+
+
 
 
 # How to use
