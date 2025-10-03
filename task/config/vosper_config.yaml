@@ -1,0 +1,18 @@
+Greeting:
+ - text: "Hello Guest, please just look at me with smile."
+   confirm: ""
+GoTo:
+ - text: "Please Follow me."
+   confirm : ""
+ASKNAME:
+ - text: "What is your name?"
+   confirm: "your name is"
+   text1: "Oh wow! You have same name the"
+   text2: "as the host."
+ASKFAVORITE:
+ - text: "What is your favorite drink?"
+   confirm: "your favorite drink is"
+   text1: "Oh wow! Your favorite drink is "
+ASKINTEREST:
+ - text: "What is your hobby?"
+   confirm: "your hobby is"

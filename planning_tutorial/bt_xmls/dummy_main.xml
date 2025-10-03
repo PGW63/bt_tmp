@@ -5,12 +5,26 @@
             <!-- <Script code="@location := 'door_in_guestroom'"/> -->
             <Script code="@willfinds := 'person'"/>
             <SubTree ID="Describe_person" node="{@node}" lifecycle="{@lifecycle}" willfinds="{@willfinds}"/>
-            <Script code="@location := 'livingroom'"/>
-            <SubTree ID="GoTo" node="{@node}" location="{@location}" lifecycle="{@lifecycle}"/>
-            <Script code="@willfinds := 'banana'"/>
+
+            <Script code="@text := 'Hello Guest! What is your name?';@prompt := 'Only get name'"/>
+            <Speak node="{@node}" text="{@text}"/>
+            <Listen node="{@node}" heard_text="{@heard_text}"/>
+            <GetTextbyLLM node="{@node}" heard_text="{@heard_text}" prompt="{@prompt}"/>
+
+
+            <Script code="@text := 'Follow me';@location := 'livingroom'" />
+            <Speak node="{@node}" text="{@text}"/>
+            <SubTree ID="GoTo" node="{@node}" lifecycle="{@lifecycle}" location="{@location}"/>
+
+            <Script code="@text := 'What is your favorite drink?';@prompt := 'Only get favorite thing';@willfinds := @text;@location := 'livingroom'"/>
+            <Speak node="{@node}" text="{@text}"/>
+            <Listen node="{@node}" heard_text="{@heard_text}"/>
+            <GetTextbyLLM node="{@node}" heard_text="{@heard_text}" prompt="{@prompt}"/>
+
+            <Script code="@willfinds := @heard_text;@location := 'door_in_guestroom'"/>
             <SubTree ID="FindObjects" node="{@node}" lifecycle="{@lifecycle}" willfinds="{@willfinds}"/>
-            <Script code="@location := 'dinningroom'"/>
             <SubTree ID="GoTo" node="{@node}" location="{@location}" lifecycle="{@lifecycle}"/>
+
         </Sequence>
     </BehaviorTree>
 </root>

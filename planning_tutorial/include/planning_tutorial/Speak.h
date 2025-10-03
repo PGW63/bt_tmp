@@ -1,5 +1,3 @@
-// Speak.h
-
 #ifndef SPEAK_H
 #define SPEAK_H
 
@@ -9,22 +7,21 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
-#include "std_msgs/msg/string.hpp"
-#include "lifecycle_msgs/srv/change_state.hpp"
-#include "lifecycle_msgs/srv/get_state.hpp"
 #include "audio_common_msgs/action/tts.hpp"
-
 
 namespace Speak {
 
 using BT::NodeStatus;
 
-class Speak : public BT::SyncActionNode
+class Speak : public BT::StatefulActionNode
 {
 public:
     Speak(const std::string& name, const BT::NodeConfig& config);
 
-    NodeStatus tick() override;
+    // 필수 오버라이드 메소드
+    NodeStatus onStart() override;
+    NodeStatus onRunning() override;
+    void onHalted() override;
 
     static BT::PortsList providedPorts();
 
@@ -35,11 +32,17 @@ private:
     rclcpp::Node::SharedPtr node_;
     rclcpp_action::Client<TTS>::SharedPtr client_;
 
-    std::shared_future<rclcpp_action::ClientGoalHandle<audio_common_msgs::action::TTS>::WrappedResult> future_result_;
+    // goal handle, future 저장
+    rclcpp_action::ClientGoalHandle<TTS>::SharedPtr goal_handle_;
+    std::shared_future<GoalHandleTTS::SharedPtr> future_goal_handle_;
+    std::shared_future<typename GoalHandleTTS::WrappedResult> future_result_;
 
+    bool finished_{false};
+    bool success_{false};
 };
 
 void RegisterNodes(BT::BehaviorTreeFactory& factory);
 
-}
+} // namespace Speak
+
 #endif

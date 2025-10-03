@@ -46,7 +46,9 @@ add_executable(bt_main_node src/bt_main.cpp
                        src/InitLifecycle.cpp
                        src/Speak.cpp
                        src/GoTo.cpp
-                       src/Describe_person.cpp)
+                       src/Describe_person.cpp
+                       src/Listen.cpp
+                       src/GetTextbyLLM.cpp)
 
 target_link_libraries(bt_main_node
   yaml-cpp

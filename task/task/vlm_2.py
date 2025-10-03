@@ -18,7 +18,7 @@ log.setLevel(logging.INFO)
 
 class AutoLLMCaptionerNode(Node):
     def __init__(self):
-        super().__init__('auto_llm_captioner_node')
+        super().__init__('auto_vlm_captioner_node')
         self.bridge = CvBridge()
 
         # 기본 파라미터
@@ -32,7 +32,9 @@ class AutoLLMCaptionerNode(Node):
             Image, "/camera/camera/color/image_raw", self.image_callback, 10
         )
 
-        self.text_prompt_sub = self.create_subscription(String, "/vlm/text_prompt", self.text_prompt_callback, 10)
+        self.text_prompt_sub = self.create_subscription(
+            String, "/vlm/text_prompt", self.text_prompt_callback, 10
+        )
 
         self.service = self.create_service(
             SetCaptionMode, "set_caption_mode", self.set_caption_mode_callback
@@ -56,10 +58,6 @@ class AutoLLMCaptionerNode(Node):
     
     def text_prompt_callback(self, msg: String):
         """텍스트 프롬프트 토픽 수신"""
-        if self.latest_image is None:
-            self.get_logger().warning("아직 이미지가 수신되지 않았습니다.")
-            return
-
         self.text_prompt = msg.data
         self.get_logger().info(f"텍스트 프롬프트 수신: {self.text_prompt}")
 
@@ -68,6 +66,17 @@ class AutoLLMCaptionerNode(Node):
         self.mode = request.mode
         self.object_name = request.object_name if request.object_name else None
 
+        if self.mode == 4:  # 텍스트 입력 모드
+            if not self.text_prompt:
+                response.success = False
+                response.message = "텍스트 프롬프트가 아직 수신되지 않았습니다."
+                return response
+            caption = self.process_text()
+            response.success = True
+            response.message = caption
+            return response
+
+        # 이미지 기반 모드
         if self.latest_image is None:
             response.success = False
             response.message = "아직 이미지가 수신되지 않았습니다."
@@ -94,6 +103,13 @@ class AutoLLMCaptionerNode(Node):
         self.get_logger().info(f"캡션 결과: {caption}")
         return caption
 
+    def process_text(self):
+        """텍스트 입력 모드 처리 (mode=4)"""
+        json_payload = self.get_request_json_for_text(self.text_prompt)
+        caption = self.call_llm(json_payload)
+        self.get_logger().info(f"텍스트 설명 결과: {caption}")
+        return caption
+
     def get_request_json(self, base64_image):
         system_prompt, user_prompt = self.get_prompts()
 
@@ -106,6 +122,24 @@ class AutoLLMCaptionerNode(Node):
                     "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
                 }
             ]}
+        ]
+
+        payload = {
+            'model': self.llm_api_model_name,
+            'messages': messages,
+            'max_tokens': 300,
+            'temperature': 0.1,
+            'top_p': 0.9,
+            'stream': False,
+        }
+        return payload
+
+    def get_request_json_for_text(self, text):
+        system_prompt, _ = self.get_prompts()
+
+        messages = [
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': text}
         ]
 
         payload = {
@@ -137,12 +171,20 @@ class AutoLLMCaptionerNode(Node):
                 )
         elif self.mode == 3:
             return (
-                "You are an AI assistant that provides detailed captions for a person in images. Answer in English. Just describe only the person.",
+                "You are introducing this person to someone else. Describe only their appearance and unique traits in a way that remains recognizable even after some time, focusing on stable details such as clothing, hairstyle, and physical features. Do not mention the location, objects, or surroundings."
+,
                 ""
             )
         elif self.mode == 4:
             return (
-                 "You are an AI assistant. Explain the given text clearly and concisely in English."
+                "You are a word extractor. Explain only the prompt below clearly and concisely in English. \
+                You will receive a sentence and an additional instruction describing what to extract or answer from that sentence. \
+                Follow the instruction strictly and output only the required word or phrase. \
+                For example: \
+                'My name is Alisa' and 'Only get name' → Answer: 'Alisa' \
+                'I like the cola most' and 'Get his favorite drink' → Answer: 'cola'",
+
+                ""  # user 입력은 text_prompt_callback에서 받아옴
             )
         else:
             return ("", "")
@@ -156,12 +198,9 @@ class AutoLLMCaptionerNode(Node):
             full_api_url += f'models/{self.llm_api_model_name}:generateContent'
             headers = {'Content-Type': 'application/json', 'x-goog-api-key': self.llm_api_key}
         else:
-            # --- 수정된 부분: /v1/ 추가 및 'ollama' 대신 일반 OpenAI 호환 로직 사용 ---
             # LM Studio는 /v1/chat/completions 엔드포인트를 사용합니다.
             full_api_url += 'v1/chat/completions'
-            # LM Studio는 API Key가 없어도 작동하지만, 코드 구조를 유지합니다.
             headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {self.llm_api_key}'}
-            # ----------------------------------------------------------------------
             
         try:
             log.info(f"LLM API로 요청 중: {full_api_url}")

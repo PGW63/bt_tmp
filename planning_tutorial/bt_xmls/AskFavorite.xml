@@ -1,0 +1,15 @@
+<?xml="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+    <BehaviorTree ID="AskFavorite">
+        <Sequence>
+            <Script code="@text := 'what is your favorite ' "/>
+            <Speak node="{@node}" text="{@text}"/>
+            <Listen node="{@node}" text="{@text}"/>
+
+            <Script code="@prompt := 'Only Get Favorite thing'"/>
+            <GetTextbyLLM node="{@node}" text="{@text}" prompt="{@prompt}"/>
+
+            <Speak node="{@node}" text="{@text}"/>
+        </Sequence>
+    </BehaviorTree>
+</root>

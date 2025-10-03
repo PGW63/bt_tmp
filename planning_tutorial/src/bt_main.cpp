@@ -8,6 +8,8 @@
 #include "planning_tutorial/GoTo.h"
 #include "planning_tutorial/Speak.h"
 #include "planning_tutorial/Describe_person.h"
+#include "planning_tutorial/Listen.h"
+#include "planning_tutorial/GetTextbyLLM.h"
 
 #include <chrono> // std::chrono_literals 사용
 #include <ament_index_cpp/get_package_share_directory.hpp>
@@ -23,11 +25,15 @@ int main(int argc, char** argv)
     black_board->set("location", "None");
     black_board->set("willfinds", "None");
     black_board->set("text", "None");
+    black_board->set("prompt", "None");
+    black_board->set("heard_text", "None");
 
     BT::BehaviorTreeFactory factory;
 
     factory.registerNodeType<LifecycleBT::InitLifecycle>("InitLifecycle");
     factory.registerNodeType<Speak::Speak>("Speak");
+    factory.registerNodeType<Listen::Listen>("Listen");
+    factory.registerNodeType<GetTextbyLLM::GetTextbyLLM>("GetTextbyLLM");
 
     GoTo::RegisterNodes(factory);
     FindObjects::RegisterNodes(factory);
@@ -39,6 +45,7 @@ int main(int argc, char** argv)
     factory.registerBehaviorTreeFromFile(package_name+dir_name+"/GoTo.xml");
     factory.registerBehaviorTreeFromFile(package_name+dir_name+"/FindObjects.xml");
     factory.registerBehaviorTreeFromFile(package_name+dir_name+"/Describe_person.xml");
+    factory.registerBehaviorTreeFromFile(package_name+dir_name+"/AskFavorite.xml");
 
     factory.registerBehaviorTreeFromFile(package_name+dir_name+"/dummy_main.xml");
     
