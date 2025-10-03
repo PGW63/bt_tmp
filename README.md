@@ -15,7 +15,7 @@ https://github.com/BehaviorTree/BehaviorTree.CPP.git
 https://github.com/BehaviorTree/BehaviorTree.ROS2.git
 
 # Vosper 
-Vosper.py is added. 
+Some codes are added at vosper.py 
 
 ```
       def reset(self):
